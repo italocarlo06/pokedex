@@ -1,14 +1,15 @@
 import { useState, useEffect } from 'react'
-import { View, Text, Image, Button, ScrollView, FlatList } from 'react-native'
+import { View, Text, Image, FlatList } from 'react-native'
+import { createNativeStackNavigator } from '@react-navigation/native-stack';
+
+import { getPokemonTypeInfo } from '../../api/types'
+
 import HomeStyle from '../../styles/Home.style'
 import TextField from '../../components/TextField'
 import TextFieldStyle from '../../styles/TextField.style'
 import Card from '../../components/Card'
-import Props from '../Props/Props'
 import TextButton from '../../components/TextButton'
 import Loading from '../../components/Loading'
-import { createNativeStackNavigator } from '@react-navigation/native-stack';
-import { getPokemonTypeInfo } from '../../api/types'
 
 interface Props {
   navigation: any; // Add type for navigation prop
