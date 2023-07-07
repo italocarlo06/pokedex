@@ -7,8 +7,7 @@ const api = axios.create({
 
 export async function getBasicPokemonByNameId(idOrName: string): Promise<PokemonInfo> {
   try {
-    const { data } = await api.get(idOrName);
-    console.log(data.abilities)
+    const { data } = await api.get(idOrName);    
     const pokemonInfo = {
       id: data.id,
       name: data.forms[0].name,

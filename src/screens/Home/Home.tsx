@@ -1,9 +1,8 @@
 import { useState, useEffect } from 'react'
 import { View, Text, Image, FlatList } from 'react-native'
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
-
-import { getPokemonTypeInfo } from '../../api/types'
-
+import { getPokemonTypeInfo, PokemonInfo } from '../../api/types'
+import { getBasicPokemonByNameId } from '../../api/pokemon'
 import HomeStyle from '../../styles/Home.style'
 import TextField from '../../components/TextField'
 import TextFieldStyle from '../../styles/TextField.style'
@@ -34,7 +33,7 @@ const Home = ({ navigation }: Props) => {
     type: Type
   }
 
-  const [listPokemon, setListPokemon] = useState<Array<Pokemon>>([])
+  const [listPokemon, setListPokemon] = useState<Array<PokemonInfo>>([])
   const [loading, setLoading] = useState<boolean>(true)
   useEffect(() => {
     const fetchPokemonSprites = async () => {
@@ -43,31 +42,13 @@ const Home = ({ navigation }: Props) => {
         const data = await response.json();
 
         const pokemonList = data.results;
-        const newPokemon: Array<Pokemon> = []
+        const newPokemon: Array<PokemonInfo> = []
         let id_pokemon: number = 0
         for (const pokemon of pokemonList) {
-          id_pokemon++
-          const pokemonResponse = await fetch(pokemon.url);
-          const pokemonData = await pokemonResponse.json();
-          const type: Array<string> = pokemonData.types.map((value: Types) => {
-            const newArray: Array<string> = []
-
-            newArray.push(value.type.name)
-            return newArray
-          })
-
-          const name = pokemonData.name.charAt(0).toUpperCase() + pokemonData.name.slice(1);
-          const pokemonCard: Pokemon = {
-            code: `#${id_pokemon}`,
-            name: name,
-            url: pokemonData.sprites.other['official-artwork'].front_default,
-            color: getPokemonTypeInfo(pokemonData.types[0].type.name).cor,
-            type: type
-          }
-
-          newPokemon.push(pokemonCard)
+          id_pokemon++;
+          const pokemonInfo = await getBasicPokemonByNameId(pokemon.name);
+          newPokemon.push(pokemonInfo);
         }
-
         setListPokemon(newPokemon)
         setLoading(false)
 
@@ -78,15 +59,22 @@ const Home = ({ navigation }: Props) => {
     fetchPokemonSprites()
   }, [])
 
-  const renderCardRows = (pokemons: Array<Pokemon>) => {
+  const renderCardRows = (pokemons: Array<PokemonInfo>) => {
 
     return (<FlatList
       numColumns={3}
       data={pokemons}
-      keyExtractor={(pokemon) => pokemon.code}
+      keyExtractor={(pokemon) => pokemon.id}
       renderItem={({ item, index }) => {
         return (
-          <Card onPress={() => { navigation.navigate('Detalhes', { name: item.name }) }} key={index} code={item.code} name={item.name} url={item.url} color={item.color} />
+          <Card
+            onPress={() => { navigation.navigate('Detalhes', { name: item.name }) }}
+            key={index}
+            code={item.id}
+            name={item.name}
+            url={item.sprite}
+            color={item.mainType.cor}
+          />
         );
       }}
     />);
