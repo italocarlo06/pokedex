@@ -27,6 +27,7 @@ export interface PokemonInfo {
   secondaryType?: PokemonType;
   abilities?: string[];
   stats: PokemonStats;
+  empty?: boolean;
 }
 
 

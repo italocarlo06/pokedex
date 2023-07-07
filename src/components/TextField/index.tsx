@@ -1,16 +1,17 @@
-import { StyleProp, TextInput,View, TextStyle,Text } from "react-native";
+import { StyleProp, TextInput, View, TextStyle, Text, TextInputProps } from "react-native";
 
-interface IProposTextField{
-    placeHolder? : string 
-    style? : StyleProp<TextStyle>
+interface IProposTextField extends TextInputProps {
+    placeHolder?: string
+    style?: StyleProp<TextStyle>
 }
-const TextField : React.FC<IProposTextField> = ({placeHolder,style})=>{
-  
+const TextField: React.FC<IProposTextField> = ({ placeHolder, style, ...rest }) => {
+
     return (
-            <TextInput
-                style={style}
-                placeholder={placeHolder}
-            />
+        <TextInput
+            style={style}
+            placeholder={placeHolder}
+            {...rest}
+        />
     )
 }
 

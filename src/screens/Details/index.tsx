@@ -22,6 +22,8 @@ const Details = ({ route, navigation }: DetailsProps) => {
   const [pokemonInfo, setPokemonInfo] = useState<PokemonInfo>();
   const [pokemonName, setPokemonName] = useState(route.params.name);
 
+
+
   useEffect(() => {
     const fetchPokemonData = async (nameOrId: string) => {
       const pokemonData = await getBasicPokemonByNameId(nameOrId.toLowerCase());
@@ -42,7 +44,7 @@ const Details = ({ route, navigation }: DetailsProps) => {
           <TouchableOpacity onPress={() => navigation.goBack()}>
             <AntDesign name={"arrowleft"} size={28} color="#FFF" />
           </TouchableOpacity>
-          <Text style={styles.headerTitle}>{pokemonName}</Text>
+          <Text style={styles.headerTitle}>{pokemonInfo.renderName}</Text>
         </View>
         <Text style={styles.pokemonId}>#{pokemonInfo.id}</Text>
 

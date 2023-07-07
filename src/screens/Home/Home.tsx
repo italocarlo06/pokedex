@@ -1,7 +1,6 @@
 import { useState, useEffect } from 'react'
 import { View, Text, Image, FlatList } from 'react-native'
-import { createNativeStackNavigator } from '@react-navigation/native-stack';
-import { getPokemonTypeInfo, PokemonInfo } from '../../api/types'
+import { PokemonInfo } from '../../api/types'
 import { getBasicPokemonByNameId } from '../../api/pokemon'
 import HomeStyle from '../../styles/Home.style'
 import TextField from '../../components/TextField'
@@ -9,6 +8,7 @@ import TextFieldStyle from '../../styles/TextField.style'
 import Card from '../../components/Card'
 import TextButton from '../../components/TextButton'
 import Loading from '../../components/Loading'
+import { Title } from '../../components/Title';
 
 interface Props {
   navigation: any; // Add type for navigation prop
@@ -16,25 +16,22 @@ interface Props {
 
 const Home = ({ navigation }: Props) => {
 
-  const { Navigator, Screen } = createNativeStackNavigator()
-  interface Pokemon {
-    code: string,
-    name: string,
-    url: string,
-    type: Array<string>,
-    color: string
-  }
 
-  interface Type {
-    name: string
-  }
-  interface Types {
-    slot: number,
-    type: Type
-  }
+  const [filter, setFilter] = useState("");
+  const [loading, setLoading] = useState<boolean>(true);
 
-  const [listPokemon, setListPokemon] = useState<Array<PokemonInfo>>([])
-  const [loading, setLoading] = useState<boolean>(true)
+  const [listPokemon, setListPokemon] = useState<Array<PokemonInfo>>([]);
+  const [listFilteredPokemon, setListFilteredPokemon] = useState<Array<PokemonInfo>>([]);
+
+
+  function handleApplyFilter() {
+    if (filter.trim() === "") {
+      setListFilteredPokemon(listPokemon);
+    } else {
+      const filteredList = listPokemon.filter(pokemon => (pokemon.id === filter) || pokemon.name.startsWith(filter.toLowerCase()));
+      setListFilteredPokemon(filteredList);
+    }
+  }
   useEffect(() => {
     const fetchPokemonSprites = async () => {
       try {
@@ -43,13 +40,14 @@ const Home = ({ navigation }: Props) => {
 
         const pokemonList = data.results;
         const newPokemon: Array<PokemonInfo> = []
-        let id_pokemon: number = 0
         for (const pokemon of pokemonList) {
-          id_pokemon++;
           const pokemonInfo = await getBasicPokemonByNameId(pokemon.name);
           newPokemon.push(pokemonInfo);
         }
+
+        console.log(newPokemon);
         setListPokemon(newPokemon)
+        setListFilteredPokemon(newPokemon)
         setLoading(false)
 
       } catch (error) {
@@ -57,7 +55,8 @@ const Home = ({ navigation }: Props) => {
       }
     };
     fetchPokemonSprites()
-  }, [])
+  }, []);
+
 
   const renderCardRows = (pokemons: Array<PokemonInfo>) => {
 
@@ -71,7 +70,7 @@ const Home = ({ navigation }: Props) => {
             onPress={() => { navigation.navigate('Detalhes', { name: item.name }) }}
             key={index}
             code={item.id}
-            name={item.name}
+            name={item.renderName}
             url={item.sprite}
             color={item.mainType.cor}
           />
@@ -92,12 +91,38 @@ const Home = ({ navigation }: Props) => {
 
 
       <View style={HomeStyle.header}>
-        <TextField style={TextFieldStyle.TextField} placeHolder='Buscar..' />
-        <TextButton style={{ backgroundColor: "white", width: 40, height: 40, borderRadius: 60, marginRight: 10 }} label='#' onClick={() => { }} />
+        <TextField
+          style={TextFieldStyle.TextField}
+          placeHolder='Buscar..'
+          onChangeText={newText => setFilter(newText)}
+          defaultValue={filter}
+        />
+        <TextButton
+          style={
+            {
+              backgroundColor: "white",
+              width: 40,
+              height: 40,
+              borderRadius: 60,
+              marginRight: 10
+            }
+          }
+          label='#'
+          onClick={() => handleApplyFilter()}
+        />
       </View>
 
       <View style={HomeStyle.subContainer}>
-        {renderCardRows(listPokemon)}
+        {listFilteredPokemon.length > 0 && renderCardRows(listFilteredPokemon)}
+        <View style={{ flex: 1, alignItems: 'center', justifyContent: "center" }}>
+          {(listFilteredPokemon.length === 0) &&
+            <>
+              <Image style={{ marginTop: 5, width: 300, height: 200 }} source={require("../../../assets/404.png")} />
+              <Title titleColor='#1D1D1D' titleText='Oops! Nenhum pokemon encontrado.' />
+            </>
+          }
+
+        </View>
       </View>
     </View>
   )
